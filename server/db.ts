@@ -12,9 +12,19 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(here, 'data');
 const dbPath = process.env.JALSAFA_DB_PATH ?? path.join(dataDir, 'jalsafa.db');
 
-fs.mkdirSync(dataDir, { recursive: true });
+// Turso (hosted libSQL) when configured — same SQLite engine, identical SQL
+// and schema, just served over the network. Used by the Vercel deployment;
+// local development keeps the embedded file when these are unset.
+const tursoUrl = process.env.TURSO_DATABASE_URL;
+const tursoAuthToken = process.env.TURSO_AUTH_TOKEN;
 
-export const client: Client = createClient({ url: `file:${dbPath}` });
+// File mode only: create the database directory. Vercel's filesystem is
+// read-only outside /tmp, so this must never run when Turso is configured.
+if (!tursoUrl) fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+
+export const client: Client = tursoUrl
+  ? createClient({ url: tursoUrl, authToken: tursoAuthToken })
+  : createClient({ url: `file:${dbPath}` });
 
 const SCHEMA: string[] = [
   `CREATE TABLE IF NOT EXISTS local_bodies (

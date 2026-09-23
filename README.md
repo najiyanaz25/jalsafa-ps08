@@ -76,7 +76,7 @@ Other scripts:
 | Command | Purpose |
 |---|---|
 | `npm run typecheck` | Strict TS check for client **and** server |
-| `npm run seed` | Drop + re-seed the demo database |
+| `npm run seed` | Local: drop + re-seed the demo DB. With `TURSO_*` env vars: seed Turso once (only if empty) |
 | `npm run build` | Build the frontend to `dist/` |
 | `npm run qa` | Automated 16-area QA suite (headless Chromium, ~2 min) |
 
@@ -152,6 +152,36 @@ npm run qa             # optional: 16-area end-to-end QA (needs Playwright chrom
 npm start              # serve UI + API (PORT env, default 8787)
 ```
 
-Deployable anywhere a Node process runs (Render / Railway / Fly / a VM):
-set `PORT`, run the three commands above. For GitHub Pages-style static-only
-hosts a backend would be required — this app needs its API, so use a Node host.
+Anywhere a Node process runs (Render / Railway / Fly / a VM): set `PORT`,
+run the commands above.
+
+### Deploying to Vercel (Turso hosted libSQL)
+
+The UI is static (`dist/`, served by Vercel's CDN) and the API is one
+serverless function (`api/index.ts`, routed by `vercel.json` rewrites) —
+Vercel never runs `npm start`.
+
+1. **Create the database + seed it ONCE** (same SQLite engine, hosted):
+
+   ```bash
+   turso db create jalsafa-ps08
+   turso db show jalsafa-ps08 --url        # → TURSO_DATABASE_URL
+   turso db tokens create jalsafa-ps08     # → TURSO_AUTH_TOKEN
+
+   # bash:
+   TURSO_DATABASE_URL="libsql://…" TURSO_AUTH_TOKEN="…" npm run seed
+   # PowerShell:
+   $env:TURSO_DATABASE_URL="libsql://…"; $env:TURSO_AUTH_TOKEN="…"; npm run seed
+   ```
+
+   Seeding is idempotent — it only inserts when the tables are empty, so it
+   never wipes existing tickets.
+2. **Vercel**: import the GitHub repo (auto-detects Vite → build
+   `npm run build`, output `dist`) → add the two env vars above
+   (Production + Preview) → Deploy.
+3. **Verify**: `/api/health` → `{ ok: true, facilityCount: 29 }`, file a
+   report → it appears on the Ticket desk, advance a ticket, reload
+   `/facility/f07`, toggle offline mode.
+
+Neither variable is needed locally — development always uses the embedded
+`server/data/jalsafa.db` file.
