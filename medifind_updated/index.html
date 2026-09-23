@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediFind — Government Pharmacy Tracker</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+</head>
+<body>
+<div class="demo-bar"><span class="badge" data-i18n="demoBadge">▣ DEMO DATA</span><strong data-i18n="demoNoticeStrong">Notice for Hackathon Evaluators:</strong> <span data-i18n="demoNotice">All facility stock levels, batch numbers, and verification timestamps are simulated realistic demonstration data. This portal does not connect to live national health databases.</span><span class="advisory" data-i18n="clinicalActive">◉ Clinical Advisory Active　×</span></div>
+<header class="nav">
+  <a class="brand" href="index.html"><span class="brand-icon">♡</span><span><b>MediFind</b><small data-i18n="brandSub">Government Pharmacy Tracker</small></span></a>
+  <nav>
+    <a class="active" href="index.html">⌕　<span data-i18n="navFind">Find Medicine</span></a><a href="facilities.html">▥　<span data-i18n="navFacilities">Facilities</span></a><a href="equivalents.html">⌕　<span data-i18n="navEquiv">Generic Equivalents</span></a><a href="data-health.html">⌁　<span data-i18n="navHealth">Data Health</span></a>
+  </nav>
+  <div class="nav-actions"><select id="language" aria-label="Language"><option value="en">English</option><option value="ml">മലയാളം</option><option value="hi">हिन्दी</option></select><button class="dark-btn" onclick="focusSearch()">⌕　<span data-i18n="checkStock">Check Stock</span></button></div>
+</header>
+
+<main class="container">
+  <div class="eyebrow" data-i18n="findLabel">Government Medicine Availability</div>
+  <section class="hero">
+    <div><h1 data-i18n="findTitle">Find medicine before you travel.</h1>
+    <p data-i18n="findSub">Search verified government dispensary stock, compare nearby facilities, and check when the data was last updated.</p></div>
+    <div class="search-panel" id="searchBox">
+      <label data-i18n="medicine">Medicine</label>
+      <div class="search-row"><input id="medicineSearch" data-i18n-placeholder="searchPlaceholder" placeholder="e.g. Amlodipine 5mg" value=""><button onclick="searchMedicine()">⌕ <span data-i18n="search">Search</span></button></div>
+      <div class="quick"><button onclick="setMedicine('Amlodipine 5mg')">Amlodipine 5mg</button><button onclick="setMedicine('Metformin 500mg')">Metformin 500mg</button><button onclick="setMedicine('Paracetamol 500mg')">Paracetamol 500mg</button></div>
+    </div>
+  </section>
+
+  <section id="results" class="hidden">
+    <div class="section-head"><div><span class="pill teal" data-i18n="searchResults">SEARCH RESULTS</span><h2 id="resultTitle">Amlodipine 5mg</h2><p data-i18n="searchResultsSub">Government facilities with simulated current availability.</p></div><span class="fresh" id="resultsFresh">● Updated 4 hours ago</span></div><div class="stock-summary" id="stockSummary"></div><div id="medicineDetails" class="medicine-details"></div><div id="resultTools" class="filter-tools"></div>
+    <div class="grid three" id="resultCards"></div>
+  </section>
+
+  <section class="overview">
+    <div class="section-head"><div><span class="pill">NEARBY GOVERNMENT NETWORK</span><h2>Check stock across the network</h2><p>Browse the sample Metro District network before travelling.</p></div><a class="outline-btn" href="facilities.html">View all facilities →</a></div>
+    <div class="grid three">
+      <article class="facility-card">
+        <div class="card-top red">DISTRICT GENERAL HOSPITAL <span>24/7 EMERGENCY</span></div><div class="card-body"><h3>Central District General Hospital Pharmacy</h3><p>⌖ 100 Medical Centre Boulevard, Central District</p><p>◷ 24/7 Dispensary (Emergency & Inpatient / Outpatient 8am–8pm)</p><p>☎ +1 (555) 019-2831</p><div class="availability"><span>Formulary Availability</span><b>100%</b><i><em style="width:100%"></em></i></div><small>◉ 28 In Stock　△ 0 Low　⊗ 0 Out</small><div class="card-foot"><span>● Updated 4 hours ago</span><a href="facilities.html">View Catalog →</a></div></div>
+      </article>
+      <article class="facility-card"><div class="card-top teal">URBAN POLYCLINIC</div><div class="card-body"><h3>Eastside Government Polyclinic</h3><p>⌖ 73 Sunbird Crescent, East District</p><p>◷ Mon–Fri: 8:00 AM–6:00 PM, Sat: 8:00 AM–2:00 PM</p><p>☎ +1 (555) 019-7311</p><div class="availability"><span>Formulary Availability</span><b>96%</b><i><em style="width:96%"></em></i></div><small>◉ 27 In Stock　△ 1 Low　⊗ 0 Out</small><div class="card-foot"><span>● Updated 4 hours ago</span><a href="facilities.html">View Catalog →</a></div></div></article>
+      <article class="facility-card"><div class="card-top purple">PRIMARY HEALTH POST</div><div class="card-body"><h3>Greenfield Urban Health Dispensary</h3><p>⌖ 18 Botanical Gardens Way, Greenfield</p><p>◷ Mon–Fri: 8:30 AM–5:00 PM</p><p>☎ +1 (555) 019-1498</p><div class="availability"><span>Formulary Availability</span><b class="amber-text">46%</b><i><em class="amber" style="width:46%"></em></i></div><small>◉ 13 In Stock　△ 15 Low　⊗ 0 Out</small><div class="card-foot"><span>● Updated 4 hours ago</span><a href="facilities.html">View Catalog →</a></div></div></article>
+    </div>
+  </section>
+
+  <section class="map-section">
+    <div><span class="pill teal">LOCATION VIEW</span><h2>Nearby stock at a glance</h2><p>Map styling is a prototype visualization; facility records are simulated demo data.</p></div>
+    <div id="liveMap" class="map"></div>
+  </section>
+
+  <div class="safety">ⓘ <b data-i18n="safetyTitle">Healthcare Safety Notice:</b> <span data-i18n="safetyBody">MediFind is a stock availability directory, not a prescribing service.</span> <strong data-i18n="safetyStrong">Never substitute medications without consulting your pharmacist or clinician.</strong></div>
+</main>
+<footer><div class="emergency">● <b data-i18n="emergencyTitle">Medical Emergency?</b> <span data-i18n="emergencyBody">Do not use this portal — call emergency services immediately.</span> <span>☎ <span data-i18n="emergency">Emergency</span>: <b>999 / 911</b>　 <span data-i18n="healthline">Healthline</span>: <b>1800-HEALTH</b></span></div><div class="footer-grid"><div><div class="footer-brand">♡ MediFind</div><b data-i18n="publicHealth">PUBLIC HEALTH INITIATIVE</b><p data-i18n="footerDesc">Reducing wasted patient travel across government clinics, polyclinics, and hospital dispensaries. Providing verified stock availability, generic bioequivalents, and data freshness indicators for the public.</p><small data-i18n="builtWith">◈ Hackathon Prototype · Built with HTML, CSS & JavaScript</small></div><div><h4 data-i18n="coreModules">CORE MODULES</h4><p data-i18n="moduleSearch">Medicine Search</p><p data-i18n="moduleFacilities">Facilities Directory</p><p data-i18n="moduleEquiv">Generic Equivalents</p><p data-i18n="moduleHealth">Data Health Monitor</p></div><div><h4 data-i18n="healthSafety">HEALTH & SAFETY</h4><p data-i18n="healthSafetyText">This tool is for availability discovery only. Never substitute medications without consulting a licensed pharmacist or prescribing clinician.</p><p class="yellow" data-i18n="simulatedActive">● Simulated Demo Data Active</p></div></div><div class="copyright">© 2026 MediFind Public Health Project. Hackathon Demo. <span data-i18n="footerLinks">Privacy Policy　 Clinical Standards　 Open Data API</span></div></footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="script.js"></script>
+</body></html>
